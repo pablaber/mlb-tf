@@ -1,0 +1,19 @@
+{
+  "name": "mlb-tf",
+  "version": "0.1.0",
+  "description": "Machine learning excercise using Tensorflow and MLB game data.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pablaber/mlb-tf.git"
+  },
+  "author": "Patrick Bacon-Blaber",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pablaber/mlb-tf/issues"
+  },
+  "homepage": "https://github.com/pablaber/mlb-tf#readme"
+}
