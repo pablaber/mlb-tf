@@ -9,15 +9,16 @@ const GameInfo = require('./lib/app/GameInfo');
 const EloMap = require('./lib/app/EloMap');
 const log = require('./lib/util/logger');
 
-const { DATE_FORMATS } = require('./lib/config/constants');
+const { DATE_FORMATS, ERROR_MESSAGES } = require('./lib/config/constants');
 
-const FROM_DATE = '20190328';
+const FROM_DATE = '20190301';
 const TO_DATE = '20191001';
 
 /**
  * The main function of the app
  */
 async function main() {
+  const postponedIds = [];
   const config = configFactory.generate();
   const client = new MySportsFeedsMlbClient({
     apiKey: config.mySportsFeeds.apiKey,
@@ -41,8 +42,15 @@ async function main() {
       date,
     });
     for (const gameObject of games) {
-      const gameInfo = await GameInfo.loadFromGameObject(client, gameObject);
-      eloMap.update(gameInfo);
+      try {
+        const gameInfo = await GameInfo.loadFromGameObject(client, gameObject, currentParsingDate.dayOfYear());
+        eloMap.update(gameInfo);
+      } catch (err) {
+        if (err.message === ERROR_MESSAGES.POSTPONED) {
+          continue;
+        }
+        throw err;
+      };
     }
   }
   log.writeLn('Finished processing.');

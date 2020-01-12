@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node main.js",
-    "debug": "node debug main.js"
+    "debug": "DEBUGGER=true node debug main.js"
   },
   "repository": {
     "type": "git",
