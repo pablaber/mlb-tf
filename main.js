@@ -7,11 +7,12 @@ const configFactory = require('./lib/config/config-factory');
 const MySportsFeedsMlbClient = require('./lib/client/my-sports-feeds-mlb-client');
 const GameInfo = require('./lib/app/GameInfo');
 const EloMap = require('./lib/app/EloMap');
+const log = require('./lib/util/logger');
 
-const { MSF_DATE_FORMAT } = require('./lib/config/constants');
+const { DATE_FORMATS } = require('./lib/config/constants');
 
 const FROM_DATE = '20190328';
-const TO_DATE = '20190501';
+const TO_DATE = '20191001';
 
 /**
  * The main function of the app
@@ -24,13 +25,18 @@ async function main() {
   });
   const eloMap = new EloMap();
 
-  const currentParsingDate = moment(FROM_DATE, MSF_DATE_FORMAT);
-  const endingDate = moment(TO_DATE, MSF_DATE_FORMAT);
+  const currentParsingDate = moment(FROM_DATE, DATE_FORMATS.MSF);
+  const endingDate = moment(TO_DATE, DATE_FORMATS.MSF);
+  const totalDays = endingDate.diff(currentParsingDate, 'days');
 
-  for (let date = currentParsingDate.format(MSF_DATE_FORMAT);
+  log.writeLn(`Processing ELO from ${currentParsingDate.format(DATE_FORMATS.LONG)} to ${endingDate.format(DATE_FORMATS.LONG)} (${totalDays} days)`);
+
+  let i = 0;
+  for (let date = currentParsingDate.format(DATE_FORMATS.MSF);
     currentParsingDate.isBefore(endingDate);
-    date = currentParsingDate.add(1, 'day').format(MSF_DATE_FORMAT)) {
-    console.log(date);
+    date = currentParsingDate.add(1, 'day').format(DATE_FORMATS.MSF)) {
+    const pct = Math.floor(100 * ++i / totalDays);
+    log.write(`Current Date: ${currentParsingDate.format(DATE_FORMATS.SHORT)} (${pct}%)`);
     const { games } = await client.getDailyTeamGameLogs({
       date,
     });
@@ -39,8 +45,9 @@ async function main() {
       eloMap.update(gameInfo);
     }
   }
+  log.writeLn('Finished processing.');
 
-  console.log(JSON.stringify(eloMap.eloMap));
+  log.writeLn(JSON.stringify(eloMap.asRankedArray()));
 };
 
 (async () => {
